@@ -1,0 +1,55 @@
+#!/usr/bin/env python
+
+import requests
+import argparse
+import os
+from tqdm import trange
+
+
+def request_openapi(input_text, prefix=""):
+    api_endpoint = "https://api.openai.com/v1/completions"
+    api_key = os.environ.get("OPENAI_API_KEY")
+
+    request_headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + api_key
+    }
+
+    request_data = {
+        "model": "text-davinci-003",
+        "prompt": f"{prefix}{input_text}",
+        "max_tokens": 2048,
+        "temperature": 0.5
+    }
+
+    response = requests.post(
+        api_endpoint, headers=request_headers, json=request_data, stream=True)
+
+    if response.status_code == 200:
+        response_text = response.json()["choices"][0]["text"]
+        print("Response:" + response_text)
+    else:
+        print(f"Request failed with status code: {str(response.status_code)}")
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-q", "--question", help="Question to answer")
+
+    # Add a flag for retry
+    parser.add_argument(
+        "-r", "--retry", help="Retry asking the same question", action="store_true")
+
+    args = parser.parse_args()
+
+    # Error out if question is not provided
+    if not args.question:
+        print("Provide a question")
+        exit(1)
+    else:
+        question = args.question
+
+    if args.retry:
+        request_openapi(question, "Retry Again... ")
+    else:
+        request_openapi(question)

@@ -1,0 +1,80 @@
+#!/usr/bin/env python
+
+import requests
+import argparse
+import os
+
+
+def request_openapi(input_text, additional_text, prefix=""):
+    api_endpoint = "https://api.openai.com/v1/completions"
+    api_key = os.environ.get("OPENAI_API_KEY")
+
+    request_headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + api_key
+    }
+
+    request_data = {
+        "model": "text-davinci-003",
+        "prompt": f"{prefix}Rephrase the following text with professional technical language and proficient grammar{additional_text}:\n\n{input_text}",
+        "max_tokens": 2048,
+        "temperature": 0.5
+    }
+
+    response = requests.post(
+        api_endpoint, headers=request_headers, json=request_data, stream=True)
+
+    if response.status_code == 200:
+        response_text = response.json()["choices"][0]["text"]
+        print("Rephrased text:" + response_text)
+    else:
+        print(f"Request failed with status code: {str(response.status_code)}")
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-t", "--text", help="Text to rephrase")
+    parser.add_argument("-f", "--file", help="Input file to rephrase")
+    parser.add_argument("-x", "--additional",
+                        help="Additional text to rephrase")
+
+    # Add a flag for retry
+    parser.add_argument(
+        "-r", "--retry", help="Retry asking the same question", action="store_true")
+
+    args = parser.parse_args()
+
+    # Error out if both text and file are not provided
+    if not args.text and not args.file:
+        print("Provide either text or file")
+        exit(1)
+
+    # Error out if both text and file are provided
+    if args.text and args.file:
+        print("Provide either text or file")
+        exit(1)
+
+    # Read text from file or from command line
+    if args.text:
+        text = args.text
+    elif args.file:
+        if os.path.isfile(args.file):
+            with open(args.file, "r") as f:
+                text = f.read()
+        else:
+            print("File not found")
+            exit(1)
+    else:
+        print("No text to rephrase")
+        exit(1)
+
+    # Add additional text if provided
+    if args.additional:
+        additional_text = "\t" + args.additional
+    else:
+        additional_text = ""
+
+    if args.retry:
+        request_openapi(text, additional_text, "Retry Again... ")
+    else:
+        request_openapi(text, additional_text)
