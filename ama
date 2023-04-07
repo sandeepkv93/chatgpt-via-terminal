@@ -3,7 +3,6 @@
 import requests
 import argparse
 import os
-from tqdm import trange
 
 
 def request_openapi(input_text, prefix=""):
