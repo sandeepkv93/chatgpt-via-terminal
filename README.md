@@ -3,7 +3,7 @@
 This repository has 2 scripts that uses the OpenAI API to do useful tasks.
 
 1. ama: Ask any question and get the best possible answer using AI.
-2. rephrase-tool: Rephrase any sentence using AI.
+2. rephrase: Rephrase any sentence using AI.
 
 ## Ama
 
@@ -48,7 +48,7 @@ To use the rephrase tool, follow these simple steps:
 1. Get an API key from OpenAI by creating an account or logging into an existing one.
 2. Set your API key as an environment variable named `OPENAI_API_KEY`.
 3. Install the necessary dependencies by running `pip install -r requirements.txt`, assuming that the file exists in the same directory as `rephrase.py`.
-4. Run the script in your terminal using `./rephrase-tool` followed by the arguments described below.
+4. Run the script in your terminal using `./rephrase` followed by the arguments described below.
 
 ### Arguments
 
@@ -62,29 +62,29 @@ To use the rephrase tool, follow these simple steps:
 Rephrase a sentence:
 
 ```
-$ ./rephrase-tool --text "Thank you for explaning this to me. I really appreciate it."
+$ ./rephrase --text "Thank you for explaning this to me. I really appreciate it."
 ```
 
 Rephrase a sentence with additional text:
 
 ```
-$ ./rephrase-tool --text "Thank you for explaning this to me. I really appreciate it." --additional "Be very polite."
+$ ./rephrase --text "Thank you for explaning this to me. I really appreciate it." --additional "Be very polite."
 ```
 
 Rephrase a sentence from a file:
 
 ```
-$ ./rephrase-tool --file "path/to/file.txt"
+$ ./rephrase --file "path/to/file.txt"
 ```
 
 Rephrase a sentence from a file with additional text:
 
 ```
-$ ./rephrase-tool --file "path/to/file.txt" --additional "Be very polite."
+$ ./rephrase --file "path/to/file.txt" --additional "Be very polite."
 ```
 
 Rephrase a sentence from a file with additional text and retry:
 
 ```
-$ ./rephrase-tool --file "path/to/file.txt" --additional "Be very polite." --retry
+$ ./rephrase --file "path/to/file.txt" --additional "Be very polite." --retry
 ```
