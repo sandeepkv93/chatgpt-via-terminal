@@ -1,0 +1,74 @@
+#!/usr/bin/env python
+
+import openai
+import argparse
+import os
+
+openai.api_key = os.environ.get("OPENAI_API_KEY")
+
+
+def request_openai(input_text, additional_text, prefix=""):
+    model_engine = "text-davinci-003"
+    prompt_text = f"{prefix}Rephrase the following text with professional technical language and proficient grammar{additional_text}:\n\n{input_text}"
+    completions = openai.Completion.create(
+        engine=model_engine,
+        prompt=prompt_text,
+        max_tokens=2048,
+        n=1,
+        stop=None,
+        temperature=0.5,
+    )
+
+    if completions:
+        response_text = completions.choices[0].text
+        print("Rephrased text: " + response_text)
+    else:
+        print("Unable to rephrase the text")
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-t", "--text", help="Text to rephrase")
+    parser.add_argument("-f", "--file", help="Input file to rephrase")
+    parser.add_argument("-x", "--additional",
+                        help="Additional text to rephrase")
+
+    # Add a flag for retry
+    parser.add_argument(
+        "-r", "--retry", help="Retry asking the same question", action="store_true")
+    args = parser.parse_args()
+
+    # Error out if both text and file are not provided
+    if not args.text and not args.file:
+        print("Provide either text or file")
+        exit(1)
+
+    # Error out if both text and file are provided
+    if args.text and args.file:
+        print("Provide either text or file")
+        exit(1)
+
+    # Read text from file or from command line
+    if args.text:
+        text = args.text
+    elif args.file:
+        if os.path.isfile(args.file):
+            with open(args.file, "r") as f:
+                text = f.read()
+        else:
+            print("File not found")
+            exit(1)
+    else:
+        print("No text to rephrase")
+        exit(1)
+
+    # Add additional text if provided
+    if args.additional:
+        additional_text = "\t" + args.additional
+    else:
+        additional_text = ""
+
+    if args.retry:
+        request_openai(text, additional_text, "Retry Again... ")
+    else:
+        request_openai(text, additional_text)

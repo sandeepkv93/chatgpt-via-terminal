@@ -1,27 +1,34 @@
 #!/usr/bin/env python
 
-import openai
+import requests
 import argparse
 import os
 
 
 def request_openapi(input_text, prefix=""):
-    openai.api_key = os.environ.get("OPENAI_API_KEY")
-    model_engine = "text-davinci-003"
+    api_endpoint = "https://api.openai.com/v1/completions"
+    api_key = os.environ.get("OPENAI_API_KEY")
 
-    prompt = f"{prefix}{input_text}"
-    completions = openai.Completion.create(
-        engine=model_engine,
-        prompt=prompt,
-        max_tokens=2048,
-        temperature=0.5
-    )
+    request_headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + api_key
+    }
 
-    if completions:
-        response_text = completions.choices[0].text
+    request_data = {
+        "model": "text-davinci-003",
+        "prompt": f"{prefix}{input_text}",
+        "max_tokens": 2048,
+        "temperature": 0.5
+    }
+
+    response = requests.post(
+        api_endpoint, headers=request_headers, json=request_data, stream=True)
+
+    if response.status_code == 200:
+        response_text = response.json()["choices"][0]["text"]
         print("Response:" + response_text)
     else:
-        print("Request failed.")
+        print(f"Request failed with status code: {str(response.status_code)}")
 
 
 if __name__ == "__main__":
