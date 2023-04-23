@@ -3,27 +3,30 @@
 import openai
 import argparse
 import os
+import time
 
-openai.api_key = os.environ.get("OPENAI_API_KEY")
 
+def request_openapi(input_text, additional_text="", prefix=""):
+    openai.api_key = os.environ.get("OPENAI_API_KEY")
 
-def request_openai(input_text, additional_text, prefix=""):
-    model_engine = "text-davinci-003"
-    prompt_text = f"{prefix}Rephrase the following text with professional technical language and proficient grammar{additional_text}:\n\n{input_text}"
-    completions = openai.Completion.create(
-        engine=model_engine,
-        prompt=prompt_text,
+    prompt = f"{prefix}Rephrase the following text with professional technical language and proficient grammar{additional_text}:\n\n{input_text}"
+
+    response = openai.Completion.create(
+        engine="text-davinci-003",
+        prompt=prompt,
         max_tokens=2048,
-        n=1,
-        stop=None,
-        temperature=0.5,
+        temperature=0.5
     )
 
-    if completions:
-        response_text = completions.choices[0].text
-        print("Rephrased text: " + response_text)
+    if response:
+        response_text = response.choices[0].text
+        print("Rephrased text:")
+        for char in response_text:
+            print(char, end='', flush=True)
+            time.sleep(0.005)
+        print()
     else:
-        print("Unable to rephrase the text")
+        print(f"Request failed with status code: {str(response.status_code)}")
 
 
 if __name__ == "__main__":
@@ -36,6 +39,7 @@ if __name__ == "__main__":
     # Add a flag for retry
     parser.add_argument(
         "-r", "--retry", help="Retry asking the same question", action="store_true")
+
     args = parser.parse_args()
 
     # Error out if both text and file are not provided
@@ -65,10 +69,8 @@ if __name__ == "__main__":
     # Add additional text if provided
     if args.additional:
         additional_text = "\t" + args.additional
-    else:
-        additional_text = ""
 
     if args.retry:
-        request_openai(text, additional_text, "Retry Again... ")
+        request_openapi(text, additional_text, "Retry Again... ")
     else:
-        request_openai(text, additional_text)
+        request_openapi(text)
